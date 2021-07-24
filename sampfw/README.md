@@ -29,19 +29,19 @@ This script monitors incoming bandwidth/connection counts to determine if there'
 You can stop the script with `./sampfw.sh stop`
 
 ## FAQ
-Q: Will this prevent all DDoS attacks?
+##### Q: Will this prevent all DDoS attacks?
 A: No. If an attack saturates your network or CPU (i.e softirq), this script will not help. It blocks packets in userspace. If you're at that point, you need to decent mitigation from your server provider.
 
-Q: How does this script help?
+##### Q: How does this script help?
 A: SA-MP is a unoptimized piece of garbage, so spoofed traffic quickly overwhelms the process and causes the query thread to become unresponsive, and the game thread to lag like hell. This prevents bad traffic from making your server become unplayable. If you've got a beefy enough uplink and a good CPU, this is the only missing piece you need to protect your server.
 
-Q: What's the purpose of the webserver logfile?
+##### Q: What's the purpose of the webserver logfile?
 A: The bash function repeatedly queries your webserver logs for successful logins (POST 302) and adds any IP's that show up to the whitelist. This is useful when the mitigation is enabled and a player who wasn't connected is unable to join since they're not in the whitelist. It's just an easy way for a player to get allowed in firewall when mitigation is enabled.
 
-Q: How does the MySQL query work?
+##### Q: How does the MySQL query work?
 A: This requires that you have a MySQL database which has players IP addresses in it. For the script this server was made for, we had a column which contained the recent IP's of players, and the current IP they were online under. So the query was useful there. If you don't use MySQL or don't store that info, consider implementing it. It's optional, but makes the firewall a lot more seamless.
 
-Q: What the fuck? A firewall in bash? Are you crazy?
+##### Q: What the fuck? A firewall in bash? Are you crazy?
 A: Yes.
 
 ## Support
