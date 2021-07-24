@@ -36,14 +36,14 @@ function startsrv () {
 		exit 1
 	fi
 
-  sh $discord_bash_path \
-  --webhook-url=$WEBHOOK \
-  --username "Jimmy Shootsyabot" \
-  --author "Jimmy Shootsyabot" \
-  --description "$execn server process was not found and has been started." \
-  --color "0xDD3333" \
-  --footer "Jimmy Shootsyabot" \
-  --timestamp
+	sh $discord_bash_path \
+	--webhook-url=$WEBHOOK \
+	--username "Jimmy Shootsyabot" \
+	--author "Jimmy Shootsyabot" \
+	--description "$execn server process was not found and has been started." \
+	--color "0xDD3333" \
+	--footer "Jimmy Shootsyabot" \
+	--timestamp
 
 	su -c "cd $path; nohup ./$execn &" $user > /dev/null 2>&1
 	rm -f "$lockfile"
