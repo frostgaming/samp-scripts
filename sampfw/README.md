@@ -30,7 +30,7 @@ You can stop the script with `./sampfw.sh stop`
 
 ## FAQ
 ##### Q: Will this prevent all DDoS attacks?
-A: No. If an attack saturates your network or CPU (i.e softirq), this script will not help. It blocks packets in userspace. If you're at that point, you need to decent mitigation from your server provider.
+A: No. If an attack saturates your network or CPU (i.e softirq), this script will not help. It blocks packets in userspace. If you're at that point, you need to get decent mitigation from your server provider.
 
 ##### Q: How does this script help?
 A: SA-MP is a unoptimized piece of garbage, so spoofed traffic quickly overwhelms the process and causes the query thread to become unresponsive, and the game thread to lag like hell. This prevents bad traffic from making your server become unplayable. If you've got a beefy enough uplink and a good CPU, this is the only missing piece you need to protect your server.
