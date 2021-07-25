@@ -32,19 +32,19 @@ sql_query=["rcrp"]="connect rcrp_rcrp; SELECT RecentIP FROM players WHERE Online
 
 logger () {
     # Separate logger to not pollute syslog/systemd journal
-	case "$1" in
-		E)
-			tag="[ERROR]"
-		;;
-		D)
-			tag="[DEBUG]"
-		;;
-		I)
-			tag="[INFO]"
-		;;
-	esac
+    case "$1" in
+        E)
+        	tag="[ERROR]"
+        ;;
+        D)
+        	tag="[DEBUG]"
+        ;;
+        I)
+        	tag="[INFO]"
+        ;;
+    esac
 
-	echo -e "$(date +'[%a %b %d %H:%M:%S %Z]') $tag $2" >> $logfile 2>&1
+    echo -e "$(date +'[%a %b %d %H:%M:%S %Z]') $tag $2" >> $logfile 2>&1
 }
 
 discord_notifier () {
@@ -62,14 +62,14 @@ discord_notifier () {
     fi
 
     if [[ "$1" == "enable" ]]; then
-    	sh $discord_bash_path \
-    	--webhook-url=$WEBHOOK \
+        sh $discord_bash_path \
+        --webhook-url=$WEBHOOK \
         --username "SA-MP Firewall" \
         --author "SA-MP Firewall" \
-    	--description "Excessive connections detected against $serverip ($server), Firewall has been enabled." \
-    	--color "0xDD3333" \
-    	--footer "SA-MP Firewall v0.2" \
-    	--timestamp
+        --description "Excessive connections detected against $serverip ($server), Firewall has been enabled." \
+        --color "0xDD3333" \
+        --footer "SA-MP Firewall v0.2" \
+        --timestamp
     fi
 
     logger "I" "Notifying $server of action: $1"
@@ -78,21 +78,21 @@ discord_notifier () {
 firewall_helper () {
     case "$1" in
     add)
-    	if [[ $(/usr/sbin/ipset test $server $2 > /dev/null 2>&1; echo $?) -ne 0 ]]; then
-			logger "I" "Adding ip $2 to ipset $server"
-			/usr/sbin/ipset add $server $2
-		fi
+        if [[ $(/usr/sbin/ipset test $server $2 > /dev/null 2>&1; echo $?) -ne 0 ]]; then
+            logger "I" "Adding ip $2 to ipset $server"
+            /usr/sbin/ipset add $server $2
+        fi
     ;;
     enable)
         if [[ $(iptables-save 2>/dev/null | grep "$serverport" | grep "$serverip" | grep -c "$server") -eq 0 ]]; then
             /usr/sbin/iptables -I INPUT -p udp -m udp -d $serverip --dport $serverport -j DROP
-		    /usr/sbin/iptables -I INPUT -p udp -m set --match-set $server src -d $serverip --dport $serverport -j ACCEPT
+            /usr/sbin/iptables -I INPUT -p udp -m set --match-set $server src -d $serverip --dport $serverport -j ACCEPT
             discord_notifier enable
         fi
     ;;
     disable)
-    	/usr/sbin/iptables -D INPUT -p udp -m udp -d $serverip --dport $serverport -j DROP
-		/usr/sbin/iptables -D INPUT -p udp -m set --match-set $server src -d $serverip --dport $serverport -j ACCEPT
+        /usr/sbin/iptables -D INPUT -p udp -m udp -d $serverip --dport $serverport -j DROP
+        /usr/sbin/iptables -D INPUT -p udp -m set --match-set $server src -d $serverip --dport $serverport -j ACCEPT
         discord_notifier disable
     ;;
 esac
@@ -122,9 +122,9 @@ webserver_addips () {
         return
     fi
 
-	for ipaddr in $(grep "POST /login" "$logfile" | dategrep --last-minutes 10 | grep -E 'HTTP/.*" 302 [0-9]+' | awk '{print $1}' | sort | uniq); do
+    for ipaddr in $(grep "POST /login" "$logfile" | dategrep --last-minutes 10 | grep -E 'HTTP/.*" 302 [0-9]+' | awk '{print $1}' | sort | uniq); do
         firewall_helper add $ipaddr
-	done
+    done
 
 }
 
@@ -141,7 +141,7 @@ generate_ips () {
     else
         # Get a list of recently connected players from MySQL so that
         # new people who weren't already connected can join the server
-	    mysql -s -r -N -e "$mysql_query" | sort | uniq | grep "." > $playerips
+        mysql -s -r -N -e "$mysql_query" | sort | uniq | grep "." > $playerips
     fi
 
     for ip in $whitelist; do
@@ -160,7 +160,7 @@ generate_ips () {
 
     # Delete the iptables rules, then delete the set
     /usr/sbin/iptables -D INPUT -p udp -m udp -d $serverip --dport $serverport -j DROP 2>/dev/null
-	/usr/sbin/iptables -D INPUT -p udp -m set --match-set $server src -d $serverip --dport $serverport -j ACCEPT 2>/dev/null
+    /usr/sbin/iptables -D INPUT -p udp -m set --match-set $server src -d $serverip --dport $serverport -j ACCEPT 2>/dev/null
     /usr/sbin/ipset destroy $server 2>/dev/null
 
     # Restore the ipset
@@ -187,21 +187,21 @@ monitor_state () {
     else
         webserver_addips &
 
-	    interface=$(/usr/sbin/ip -4 route show default | awk -F 'dev' '{print $2}' | awk '{print $1}')
-	    old=$(cat /sys/class/net/$interface/statistics/rx_bytes)
-	    sleep 0.5
-	    now=$(cat /sys/class/net/$interface/statistics/rx_bytes)
-	    KBS=$((($now-$old)/1024/100))
+        interface=$(/usr/sbin/ip -4 route show default | awk -F 'dev' '{print $2}' | awk '{print $1}')
+        old=$(cat /sys/class/net/$interface/statistics/rx_bytes)
+        sleep 0.5
+        now=$(cat /sys/class/net/$interface/statistics/rx_bytes)
+        KBS=$((($now-$old)/1024/100))
     
         if [[ "$KBS" -lt "$bw_threshold" ]]; then
-	    	let iters++
-	    	if [[ "$iters" -ge "1920" ]]; then
+        	let iters++
+        	if [[ "$iters" -ge "1920" ]]; then
                 rm -f /tmp/$server-enabled
                 iters="0"
             	firewall_helper disable
                 logger "I" "Bandwidth threshold minimum reached (cur: $KBS Mbps), disabling firewall for $server"
-	    	fi
-	    fi
+        	fi
+        fi
     fi
 }
 
